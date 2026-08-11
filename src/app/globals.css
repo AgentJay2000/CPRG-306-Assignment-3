@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  --background: #141210;
+  --surface: #1f1b18;
+  --surface-hover: #2a2420;
+  --foreground: #f2ede4;
+  --muted: #a69a8a;
+  --accent: #d4a24c;
+  --accent-hover: #e0b264;
+  --danger: #c0392b;
+  --danger-hover: #d4453a;
+  --border: #332c26;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-oswald);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Ticket-stub perforation edge, used on movie cards */
+.ticket-edge {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--border) 0,
+    var(--border) 6px,
+    transparent 6px,
+    transparent 14px
+  );
+  width: 1px;
+}
