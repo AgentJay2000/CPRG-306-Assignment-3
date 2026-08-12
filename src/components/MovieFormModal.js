@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function MovieFormModal({ onClose, onMovieAdded, editingMovie }) {
+  // Modal doubles as both the "add" and "edit" form depending on this prop
   const isEditing = Boolean(editingMovie)
 
   const [title, setTitle] = useState('')
@@ -12,6 +13,7 @@ export default function MovieFormModal({ onClose, onMovieAdded, editingMovie }) 
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
+  // Pre-fill the form when editing an existing movie
   useEffect(() => {
     if (editingMovie) {
       setTitle(editingMovie.title)
@@ -20,20 +22,24 @@ export default function MovieFormModal({ onClose, onMovieAdded, editingMovie }) 
     }
   }, [editingMovie])
 
+  // Update a single actor input by index
   function updateActor(index, value) {
     const updated = [...actors]
     updated[index] = value
     setActors(updated)
   }
 
+  // Add a new blank actor input
   function addActorField() {
     setActors([...actors, ''])
   }
 
+  // Remove an actor input by index
   function removeActorField(index) {
     setActors(actors.filter((_, i) => i !== index))
   }
 
+  // Validate the form, then insert or update the movie in Supabase
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
@@ -50,6 +56,7 @@ export default function MovieFormModal({ onClose, onMovieAdded, editingMovie }) 
       return
     }
 
+    // Drop empty actor fields before saving
     const cleanedActors = actors.map((a) => a.trim()).filter((a) => a.length > 0)
     if (cleanedActors.length === 0) {
       setError('Add at least one actor.')
@@ -64,6 +71,7 @@ export default function MovieFormModal({ onClose, onMovieAdded, editingMovie }) 
       actors: cleanedActors,
     }
 
+    // Update the existing row when editing, otherwise insert a new one
     const { error: saveError } = isEditing
       ? await supabase.from('movies').update(movieData).eq('id', editingMovie.id)
       : await supabase.from('movies').insert(movieData)
@@ -79,6 +87,8 @@ export default function MovieFormModal({ onClose, onMovieAdded, editingMovie }) 
   }
 
   return (
+    // Backdrop closes the modal on click; the panel stops propagation so
+    // clicking inside the form doesn't also trigger the backdrop's onClose
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
       onClick={onClose}>
       <div className="bg-surface border border-border rounded-lg p-6 w-full max-w-md"
@@ -108,6 +118,7 @@ export default function MovieFormModal({ onClose, onMovieAdded, editingMovie }) 
             />
           </div>
 
+          {/* Dynamic list of actor inputs */}
           <div>
             <label className="text-muted text-sm block mb-1">Actors</label>
             <div className="flex flex-col gap-2">

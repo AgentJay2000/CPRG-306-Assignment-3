@@ -6,19 +6,28 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function Navbar() {
+  // Auth + role state
   const [user, setUser] = useState(null)
   const [role, setRole] = useState(null)
+
+  // Dropdown / login popover visibility
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+
+  // Login form fields + status
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loggingIn, setLoggingIn] = useState(false)
+
   const router = useRouter()
+
+  // Refs used to detect outside clicks and close open popovers
   const loginRef = useRef(null)
   const profileRef = useRef(null)
 
   useEffect(() => {
+    // Load current session + profile role on mount
     async function loadUser() {
       const { data: { session } } = await supabase.auth.getSession()
       setUser(session?.user ?? null)
@@ -34,6 +43,7 @@ export default function Navbar() {
     }
     loadUser()
 
+    // Keep user/role in sync with auth events (login/logout)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (!session?.user) setRole(null)
@@ -43,7 +53,7 @@ export default function Navbar() {
     return () => listener.subscription.unsubscribe()
   }, [])
 
-
+  // Close the login/profile popovers when clicking outside of them
   useEffect(() => {
     function handleClickOutside(e) {
       if (loginRef.current && !loginRef.current.contains(e.target)) {
@@ -57,6 +67,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Log in with email/password and refresh the page to pick up the new session
   async function handleLogin(e) {
     e.preventDefault()
     setLoginError('')
@@ -80,6 +91,7 @@ export default function Navbar() {
     }
   }
 
+  // Sign out and redirect to the home page
   async function handleLogout() {
     await supabase.auth.signOut()
     setDropdownOpen(false)
@@ -93,6 +105,7 @@ export default function Navbar() {
       </Link>
 
       {!user ? (
+        // Logged-out state: login button + popover form
         <div ref={loginRef} className="relative">
           <button
             onClick={() => setLoginOpen(!loginOpen)}
@@ -133,6 +146,7 @@ export default function Navbar() {
           )}
         </div>
       ) : (
+        // Logged-in state: profile icon + dropdown with role + logout
         <div ref={profileRef} className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
